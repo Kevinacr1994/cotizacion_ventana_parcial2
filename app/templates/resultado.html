@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado de Cotización{% endblock %}
+
+{% block content %}
+    <h1 class="text-center">Resultado de Cotización</h1>
+    <p><strong>Cliente:</strong> {{ cliente.nombre }}</p>
+    <p><strong>Empresa:</strong> {{ cliente.empresa }}</p>
+    <p><strong>Total de la Cotización:</strong> ${{ total | round(0, 'floor') }}</p> <!-- Muestra total como número entero -->
+
+    <h2>Detalles de las Ventanas:</h2>
+    <ul class="list-group">
+        {% for ventana in ventanas %}
+            <li class="list-group-item">
+                <div class="ventana-container">
+                    <strong>Ventana {{ loop.index }}</strong>
+                    <div class="ventana-info">
+                        <p><strong>Estilo:</strong> {{ ventana.estilo }}</p>
+                        <p><strong>Dimensiones:</strong> {{ ventana.ancho }} x {{ ventana.alto }} cm</p>
+                        <p><strong>Acabado:</strong> {{ ventana.acabado }}</p>
+                        <p><strong>Tipo de Vidrio:</strong> {{ ventana.tipo_vidrio }}</p>
+                        <p><strong>Esmerilado:</strong> {{ 'Sí' if ventana.esmerilado else 'No' }}</p>
+                        <strong>Precio Total: ${{ ventana.calcular_costo_total() | round(0, 'floor') }}</strong>
+
+                        <h4>Cálculos del Precio Total:</h4>
+                        <ul>
+                            <li><strong>Precio Base:</strong> ${{ ventana.precio_base }}</li>
+                            <li><strong>Coeficiente de Acabado:</strong> {{ ventana.coef_acabado }} ({{ ventana.acabado }})</li>
+                            <li><strong>Coeficiente de Vidrio:</strong> {{ ventana.coef_vidrio }} ({{ ventana.tipo_vidrio }})</li>
+                            <li><strong>Esmerilado:</strong> {{ 'Sí' if ventana.esmerilado else 'No' }} (Costo adicional: ${{ ventana.costo_esmerilado | default(0) }})</li>
+                            <li><strong>Precio Adicional Total:</strong> ${{ ventana.precio_adicional | default(0) }}</li>
+                            <li><strong>**Total Final:**</strong> ${{ ventana.calcular_costo_total() | round(0, 'floor') }}</li>
+                        </ul>
+                    </div>
+                    <h4>Diseño Visual:</h4>
+                    <div class="diseño-ventana">
+                        {% if ventana.estilo == "O" %}
+                            <div class="ventana tipo-o">
+                                <div class="panel panel-abrible">O</div>
+                            </div>
+                        {% elif ventana.estilo == "XO" %}
+                            <div class="ventana tipo-xo">
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-fijo">O</div>
+                            </div>
+                        {% elif ventana.estilo == "OXO" %}
+                            <div class="ventana tipo-oxo">
+                                <div class="panel panel-abrible">O</div>
+                                <div class="panel panel-fijo">X</div>
+                                <div class="panel panel-abrible">O</div>
+                            </div>
+                        {% elif ventana.estilo == "OXXO" %}
+                            <div class="ventana tipo-oxxo">
+                                <div class="panel panel-fijo">O</div>
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-fijo">O</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="text-center mt-4">
+        <a href="/descargar_factura" class="btn btn-primary">Descargar Factura</a>
+    </div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .list-group-item {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .ventana-container {
+            padding: 10px;
+        }
+
+        .ventana-info {
+            margin-bottom: 10px;
+        }
+
+        .ventana {
+            border: 2px solid #555;
+            width: 120px; /* Ancho base */
+            height: 100px; /* Alto base */
+            position: relative;
+            margin: 10px 0;
+            background-color: #eaeaea;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px; /* Tamaño de la letra grande */
+            font-weight: bold;
+            color: white;
+            width: 50px; /* Ancho del panel */
+            height: 100%; /* Alto del panel */
+            margin: 0 2px; /* Separación más pequeña entre los paneles */
+        }
+
+        .panel-abrible {
+            background-color: #87CEFA; /* Color del vidrio */
+            cursor: pointer;
+            transition: transform 0.3s ease; /* Animación al mover */
+        }
+
+        .panel-fijo {
+            background-color: #555; /* Color del panel fijo */
+        }
+
+        /* Efecto de movimiento al pasar el mouse */
+        .panel-abrible:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Estilos específicos para cada tipo de ventana */
+        .tipo-o .panel-abrible {
+            background-color: #87CEFA; /* Color específico para O */
+        }
+
+        .tipo-xo .panel-abrible {
+            background-color: #FF6347; /* Color específico para X en XO */
+        }
+
+        .tipo-oxo .panel-abrible {
+            background-color: #4682B4; /* Color específico para O en OXO */
+        }
+
+        .tipo-oxxo .panel-abrible {
+            background-color: #32CD32; /* Color específico para X en OXXO */
+        }
+    </style>
+
+    <script>
+        // Si necesitas agregar algún comportamiento adicional con JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aquí puedes añadir código JavaScript para manejar eventos, animaciones, etc.
+        });
+    </script>
+{% endblock %}

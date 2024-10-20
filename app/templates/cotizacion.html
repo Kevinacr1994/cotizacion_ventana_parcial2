@@ -1,0 +1,178 @@
+<!-- templates/cotizacion.html -->
+{% extends "base.html" %}
+
+{% block title %}Crear Cotización{% endblock %}
+
+{% block content %}
+    <h1>Cotización de Ventanas</h1>
+    <form action="/cotizar" method="POST">
+        <label for="nombre_cliente">Nombre del Cliente:</label>
+        <input type="text" id="nombre_cliente" name="nombre_cliente" required>
+
+        <label for="empresa_cliente">Nombre de la Empresa:</label>
+        <input type="text" id="empresa_cliente" name="empresa_cliente" required>
+
+        <label for="cantidad_ventanas">Cantidad de Ventanas:</label>
+        <input type="number" id="cantidad_ventanas" name="cantidad_ventanas" required min="1" onchange="generarFormularios()">
+
+        <div id="ventanas_container"></div>
+
+        <input type="submit" value="Calcular Cotización">
+    </form>
+
+    <script>
+        function generarFormularios() {
+            const cantidad = document.getElementById("cantidad_ventanas").value;
+            const container = document.getElementById("ventanas_container");
+            container.innerHTML = ""; // Limpiar formularios previos
+
+            for (let i = 1; i <= cantidad; i++) {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <h3>Ventana ${i}</h3>
+                    
+                    <label for="tipo_ventana_${i}">Tipo de Ventana:</label>
+                    <select id="tipo_ventana_${i}" name="tipo_ventana_${i}" required onchange="mostrarDisenoEstándar(${i})">
+                        <option value="" disabled selected>Seleccione un tipo</option>
+                        <option value="O">O</option>
+                        <option value="XO">XO</option>
+                        <option value="OXO">OXO</option>
+                        <option value="OXXO">OXXO</option>
+                    </select>
+
+                    <div id="diseno_estandar_${i}" style="display:none;">
+                        <h4>Diseño Estándar:</h4>
+                        <div class="diseño-ventana" id="diseño_ventana_${i}"></div>
+                    </div>
+
+                    <label for="dimensiones_ventana_${i}">Dimensiones (Ancho x Alto en cm):</label>
+                    <input type="text" id="dimensiones_ventana_${i}" name="dimensiones_ventana_${i}" required pattern="\\d+\\s*x\\s*\\d+" title="Formato: Ancho x Alto (ej. 100 x 200)">
+
+                    <label for="acabado_ventana_${i}">Acabado:</label>
+                    <select id="acabado_ventana_${i}" name="acabado_ventana_${i}" required>
+                        <option value="" disabled selected>Seleccione un acabado</option>
+                        <option value="Pulido">Pulido</option>
+                        <option value="Lacado Brillante">Lacado Brillante</option>
+                        <option value="Lacado Mate">Lacado Mate</option>
+                        <option value="Anodizado">Anodizado</option>
+                    </select>
+
+                    <label for="tipo_vidrio_${i}">Tipo de Vidrio:</label>
+                    <select id="tipo_vidrio_${i}" name="tipo_vidrio_${i}" required>
+                        <option value="" disabled selected>Seleccione un tipo de vidrio</option>
+                        <option value="Transparente">Transparente</option>
+                        <option value="Bronce">Bronce</option>
+                        <option value="Azul">Azul</option>
+                    </select>
+
+                    <label for="esmerilado_${i}">¿Esmerilado?</label>
+                    <input type="checkbox" id="esmerilado_${i}" name="esmerilado_${i}" value="S">
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function mostrarDisenoEstándar(index) {
+            const tipoVentana = document.getElementById(`tipo_ventana_${index}`).value;
+            const disenoContainer = document.getElementById(`diseno_estandar_${index}`);
+            const diseñoVentana = document.getElementById(`diseño_ventana_${index}`);
+
+            // Mostrar diseño estándar
+            disenoContainer.style.display = 'block'; // Muestra el diseño estándar
+            
+            // Limpiar el diseño anterior
+            diseñoVentana.innerHTML = '';
+
+            // Crear un diseño basado en el tipo de ventana
+            if (tipoVentana) {
+                let diseñoHTML = '';
+                switch (tipoVentana) {
+                    case 'O':
+                        diseñoHTML = `
+                            <div class="ventana tipo-o">
+                                <div class="panel panel-abrible">O</div>
+                            </div>`;
+                        break;
+                    case 'XO':
+                        diseñoHTML = `
+                            <div class="ventana tipo-xo">
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-fijo">O</div>
+                            </div>`;
+                        break;
+                    case 'OXO':
+                        diseñoHTML = `
+                            <div class="ventana tipo-oxo">
+                                <div class="panel panel-abrible">O</div>
+                                <div class="panel panel-fijo">X</div>
+                                <div class="panel panel-abrible">O</div>
+                            </div>`;
+                        break;
+                    case 'OXXO':
+                        diseñoHTML = `
+                            <div class="ventana tipo-oxxo">
+                                <div class="panel panel-fijo">O</div>
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-abrible">X</div>
+                                <div class="panel panel-fijo">O</div>
+                            </div>`;
+                        break;
+                }
+                diseñoVentana.innerHTML = diseñoHTML;
+            }
+        }
+    </script>
+
+    <style>
+        .ventana {
+            border: 2px solid #555;
+            width: 120px; /* Ancho base */
+            height: 100px; /* Alto base */
+            position: relative;
+            margin: 10px 0;
+            background-color: #eaeaea;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px; /* Tamaño de la letra grande */
+            font-weight: bold;
+            color: white;
+            width: 50px; /* Ancho del panel */
+            height: 100%; /* Alto del panel */
+            margin: 0 2px; /* Separación más pequeña entre los paneles */
+        }
+        .panel-abrible {
+            background-color: #87CEFA; /* Color del vidrio */
+            cursor: pointer;
+            transition: transform 0.3s ease; /* Animación al mover */
+        }
+        .panel-fijo {
+            background-color: #555; /* Color del panel fijo */
+        }
+        /* Efecto de movimiento al pasar el mouse */
+        .panel-abrible:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Estilos específicos para cada tipo de ventana */
+        .tipo-o .panel-abrible {
+            background-color: #87CEFA; /* Color específico para O */
+        }
+        .tipo-xo .panel-abrible {
+            background-color: #FF6347; /* Color específico para X en XO */
+        }
+        .tipo-oxo .panel-abrible {
+            background-color: #4682B4; /* Color específico para O en OXO */
+        }
+        .tipo-oxxo .panel-abrible {
+            background-color: #32CD32; /* Color específico para X en OXXO */
+        }
+    </style>
+{% endblock %}
